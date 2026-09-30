@@ -1,0 +1,127 @@
+# =====================================================================
+# feature_schema.yaml  —  SINGLE SOURCE OF TRUTH for the network-state
+# vector S(t). The order of `features` below defines the index of each
+# dimension in every state vector, everywhere in the system.
+#
+# The state-vector length is derived automatically from this file
+# (len(features)). Never hard-code the feature count anywhere else.
+#
+# Each feature entry:
+#   name        : machine key (used in code / arrays)
+#   label       : human label (used in the dashboard explanation panel)
+#   direction   : "up" if a HIGHER value tends to indicate more suspicious
+#                 behaviour, "down" if a LOWER value is more suspicious,
+#                 "neutral" if it is context only. Used purely for
+#                 presentation of attribution, never as ground truth.
+#   clip_max    : soft cap applied during feature building to keep the
+#                 value in a sane range before scaling (null = no cap).
+# =====================================================================
+
+version: 1
+window_seconds: 10
+
+features:
+  - name: total_connections
+    label: "Total connections"
+    direction: up
+    clip_max: 5000
+
+  - name: unique_src_ips
+    label: "Unique source IPs"
+    direction: up
+    clip_max: 256
+
+  - name: unique_dst_ips
+    label: "Unique destination IPs"
+    direction: up
+    clip_max: 256
+
+  - name: unique_dst_ports
+    label: "Unique destination ports"
+    direction: up
+    clip_max: 65535
+
+  - name: syn_count
+    label: "SYN count"
+    direction: up
+    clip_max: 5000
+
+  - name: ack_count
+    label: "ACK count"
+    direction: neutral
+    clip_max: 5000
+
+  - name: rst_count
+    label: "RST count"
+    direction: up
+    clip_max: 5000
+
+  - name: fin_count
+    label: "FIN count"
+    direction: neutral
+    clip_max: 5000
+
+  - name: syn_ack_ratio
+    label: "SYN/ACK ratio"
+    direction: up
+    clip_max: 50
+
+  - name: rst_ratio
+    label: "RST ratio"
+    direction: up
+    clip_max: 1
+
+  - name: avg_packet_size
+    label: "Avg packet size"
+    direction: neutral
+    clip_max: 65535
+
+  - name: bytes_per_sec
+    label: "Bytes / sec"
+    direction: neutral
+    clip_max: 100000000
+
+  - name: packets_per_sec
+    label: "Packets / sec"
+    direction: up
+    clip_max: 1000000
+
+  - name: avg_iat
+    label: "Avg inter-arrival time"
+    direction: down
+    clip_max: 60
+
+  - name: std_iat
+    label: "Std inter-arrival time"
+    direction: neutral
+    clip_max: 60
+
+  - name: connection_failure_rate
+    label: "Connection failure rate"
+    direction: up
+    clip_max: 1
+
+  - name: dst_diversity
+    label: "Destination diversity"
+    direction: up
+    clip_max: 1
+
+  - name: internal_conn_ratio
+    label: "Internal connection ratio"
+    direction: neutral
+    clip_max: 1
+
+  - name: alert_count
+    label: "IDS alert count"
+    direction: up
+    clip_max: 1000
+
+  - name: alert_severity_sum
+    label: "IDS alert severity sum"
+    direction: up
+    clip_max: 4000
+
+# Reserved for later expansion (NOT part of the active vector until moved
+# into `features` above and the model is retrained):
+#   ttl_mean, tcp_window_mean, fragmentation_count, payload_entropy,
+#   retransmission_count, bidirectional_ratio, port_scan_score

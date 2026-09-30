@@ -1,0 +1,54 @@
+# =====================================================================
+# stage_labels.yaml  —  Attack-stage label space for the classifier head.
+#
+# The ORDER defines the class index (0..N-1) used everywhere:
+#   training targets, model softmax output, API, frontend, MITRE map.
+# Keep this list stable once a model is trained against it.
+#
+# Stages loosely follow an intrusion kill-chain / MITRE ATT&CK tactic
+# ordering. "Normal" is index 0 and represents benign baseline traffic.
+# =====================================================================
+
+version: 1
+
+stages:
+  - id: 0
+    key: normal
+    label: "Normal"
+    severity: 0
+  - id: 1
+    key: reconnaissance
+    label: "Reconnaissance"
+    severity: 1
+  - id: 2
+    key: scanning
+    label: "Scanning"
+    severity: 2
+  - id: 3
+    key: initial_access
+    label: "Initial Access"
+    severity: 3
+  - id: 4
+    key: execution
+    label: "Execution"
+    severity: 4
+  - id: 5
+    key: persistence
+    label: "Persistence"
+    severity: 4
+  - id: 6
+    key: privilege_escalation
+    label: "Privilege Escalation"
+    severity: 5
+  - id: 7
+    key: lateral_movement
+    label: "Lateral Movement"
+    severity: 5
+  - id: 8
+    key: command_and_control
+    label: "Command & Control"
+    severity: 6
+  - id: 9
+    key: exfiltration
+    label: "Exfiltration"
+    severity: 7

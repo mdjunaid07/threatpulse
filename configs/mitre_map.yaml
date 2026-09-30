@@ -1,0 +1,95 @@
+# =====================================================================
+# mitre_map.yaml  —  Potential MITRE ATT&CK context for each attack stage.
+#
+# IMPORTANT (honesty rule): these are POTENTIAL mappings offered as
+# analyst context. A network feature or a model stage prediction does
+# NOT prove that a specific ATT&CK technique occurred. The UI must show
+# these as "Potential ATT&CK mapping" / "Behavior consistent with...".
+#
+# Each stage key (from stage_labels.yaml) maps to a list of techniques.
+# =====================================================================
+
+version: 1
+
+mappings:
+  normal:
+    tactic: "N/A"
+    techniques: []
+    note: "Baseline traffic. No suspicious progression indicated."
+
+  reconnaissance:
+    tactic: "Reconnaissance (TA0043)"
+    techniques:
+      - id: "T1595"
+        name: "Active Scanning"
+      - id: "T1590"
+        name: "Gather Victim Network Information"
+    note: "Behavior consistent with early information gathering."
+
+  scanning:
+    tactic: "Discovery (TA0007)"
+    techniques:
+      - id: "T1046"
+        name: "Network Service Discovery"
+      - id: "T1595.001"
+        name: "Active Scanning: Scanning IP Blocks"
+    note: "Behavior consistent with port/service scanning."
+
+  initial_access:
+    tactic: "Initial Access (TA0001)"
+    techniques:
+      - id: "T1190"
+        name: "Exploit Public-Facing Application"
+      - id: "T1133"
+        name: "External Remote Services"
+    note: "Behavior consistent with attempts to gain a foothold."
+
+  execution:
+    tactic: "Execution (TA0002)"
+    techniques:
+      - id: "T1059"
+        name: "Command and Scripting Interpreter"
+    note: "Behavior consistent with remote command execution attempts."
+
+  persistence:
+    tactic: "Persistence (TA0003)"
+    techniques:
+      - id: "T1136"
+        name: "Create Account"
+      - id: "T1053"
+        name: "Scheduled Task/Job"
+    note: "Behavior consistent with establishing persistence."
+
+  privilege_escalation:
+    tactic: "Privilege Escalation (TA0004)"
+    techniques:
+      - id: "T1068"
+        name: "Exploitation for Privilege Escalation"
+    note: "Behavior consistent with privilege escalation attempts."
+
+  lateral_movement:
+    tactic: "Lateral Movement (TA0008)"
+    techniques:
+      - id: "T1021"
+        name: "Remote Services"
+      - id: "T1210"
+        name: "Exploitation of Remote Services"
+    note: "Behavior consistent with movement to additional hosts."
+
+  command_and_control:
+    tactic: "Command and Control (TA0011)"
+    techniques:
+      - id: "T1071"
+        name: "Application Layer Protocol"
+      - id: "T1571"
+        name: "Non-Standard Port"
+    note: "Behavior consistent with C2 channel activity."
+
+  exfiltration:
+    tactic: "Exfiltration (TA0010)"
+    techniques:
+      - id: "T1041"
+        name: "Exfiltration Over C2 Channel"
+      - id: "T1048"
+        name: "Exfiltration Over Alternative Protocol"
+    note: "Behavior consistent with data exfiltration."

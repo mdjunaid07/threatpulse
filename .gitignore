@@ -1,0 +1,44 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# ---- Secrets / env ----
+.env
+*.local
+
+# ---- Model artifacts (regenerate with training) ----
+models/*.pt
+models/*.pkl
+models/*.json
+!models/.gitkeep
+
+# ---- Data (keep only tiny samples) ----
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/samples/**
+
+# ---- Evaluation output ----
+artifacts/evaluation/*
+!artifacts/evaluation/.gitkeep
+
+# ---- Node / frontend ----
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log

@@ -1,0 +1,81 @@
+# =====================================================================
+# config.yaml  —  Central runtime configuration.
+#
+# Values here are DEFAULTS. Any value can be overridden by an environment
+# variable of the same UPPER_SNAKE name (see backend/config loader).
+# The .env file is the recommended way to override for a given machine.
+# =====================================================================
+
+app:
+  name: "ThreatPulse"
+  full_name: "AI-Based Network Attack Forecasting"
+  team: "NeuroVex"
+  host: "0.0.0.0"
+  port: 8000
+  env: "development"          # development | production
+
+# System operating mode:
+#   live   -> Zeek + Suricata collectors feed the bus (real lab telemetry)
+#   replay -> synthetic generator feeds the bus (no lab hardware needed)
+#   hybrid -> live sensors + replay together
+mode: "replay"
+
+windowing:
+  window_seconds: 10          # length of one aggregation window
+  sequence_length: 10         # S(t-9)..S(t) fed to the model
+  forecast_horizon: 4         # K-step rollout: +10s..+40s
+
+redis:
+  host: "127.0.0.1"
+  port: 6379
+  db: 0
+  password: ""
+  # Stream names (Redis Streams). Also used as in-memory bus topic names
+  # when Redis is unavailable.
+  streams:
+    zeek: "telemetry:zeek"
+    suricata: "telemetry:suricata"
+    states: "network:states"
+    forecast: "forecast:results"
+  consumer_group: "forecaster"
+  maxlen: 20000               # approximate cap per stream (XADD MAXLEN ~)
+
+model:
+  path: "models/lstm_world_model.pt"
+  scaler_path: "models/scaler.pkl"
+  metadata_path: "models/training_metadata.json"
+  device: "cpu"
+  hidden_size: 96
+  num_layers: 2
+  dropout: 0.15
+
+lab:
+  # NEVER hard-coded to a real host. Filled in per-machine via .env.
+  kali_ip: ""
+  ubuntu_ip: ""
+  monitor_interface: ""
+  victim_interface: ""
+  # Networks considered "internal" for the internal_conn_ratio feature.
+  internal_cidrs:
+    - "10.0.0.0/8"
+    - "172.16.0.0/12"
+    - "192.168.0.0/16"
+
+sensors:
+  zeek:
+    enabled: true
+    log_dir: "/opt/zeek/logs/current"
+    conn_log: "conn.log"
+  suricata:
+    enabled: true
+    eve_path: "/var/log/suricata/eve.json"
+
+frontend:
+  origin: "http://localhost:5173"
+
+security:
+  # Comma-separated list is expanded by the loader. Restrict in production.
+  cors_origins:
+    - "http://localhost:5173"
+    - "http://127.0.0.1:5173"
+  api_key: ""                 # optional; if set, REST requires X-API-Key

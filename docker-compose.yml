@@ -1,0 +1,90 @@
+# =====================================================================
+# docker-compose.yml — development / replay stack for ThreatPulse.
+#
+# What Docker DOES here:
+#   * redis   — the telemetry stream buffer
+#   * backend — FastAPI + inference pipeline (replay mode by default)
+#   * replay  — synthetic telemetry generator feeding the SAME Redis streams
+#   * frontend— the React SOC dashboard (Vite dev server)
+#
+# What Docker does NOT do:
+#   * It does NOT run Zeek/Suricata against a live interface. Live sensor
+#     capture needs host networking on the Ubuntu VM and is documented in
+#     docs/setup_guide.md. Docker here is for development and the replay demo.
+#
+# Quick start (replay demo):
+#   docker compose up --build
+#   # dashboard: http://localhost:5173   backend: http://localhost:8000
+#
+# Train the model once (writes into ./models, mounted into the backend):
+#   docker compose run --rm backend python -m ml.training.train_lstm
+# =====================================================================
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: tp-redis
+    # Not exposed to the host by default (Redis must not be public).
+    # Uncomment to inspect locally: ports: ["127.0.0.1:6379:6379"]
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    networks: [tp]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    container_name: tp-backend
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      SYSTEM_MODE: "replay"        # replay | live | hybrid
+      REDIS_HOST: "redis"
+      APP_HOST: "0.0.0.0"
+      APP_PORT: "8000"
+      FRONTEND_ORIGIN: "http://localhost:5173"
+      MODEL_DEVICE: "cpu"
+    volumes:
+      - ./models:/app/models       # trained artifacts persist here
+      - ./artifacts:/app/artifacts
+    ports:
+      - "8000:8000"
+    networks: [tp]
+
+  # Dedicated replay generator. The backend in replay mode already emits
+  # synthetic telemetry; run this instead if you set the backend to `live`
+  # or `hybrid` and want an external replay source sharing Redis.
+  replay:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    container_name: tp-replay
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      REDIS_HOST: "redis"
+    command: ["python", "-m", "replay.synthetic_generator"]
+    networks: [tp]
+    profiles: ["external-replay"]  # off by default; enable with --profile
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../docker/frontend.Dockerfile
+    container_name: tp-frontend
+    environment:
+      VITE_BACKEND_URL: "http://localhost:8000"
+      VITE_WS_URL: "ws://localhost:8000/ws/live"
+    ports:
+      - "5173:5173"
+    networks: [tp]
+
+networks:
+  tp:
+    driver: bridge
